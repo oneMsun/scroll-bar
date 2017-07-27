@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>自定义滚动条</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    .wrap{
+      width: 298px;
+      height: 582px;
+      background:url(images/bg.png) no-repeat;
+      position: relative;
+      margin: 0 auto;
+      top: 30px;
+    }
+    .container,.content-list,.scroll-wrap,.scroll{
+      position: absolute;
+    }
+    .container{
+      width: 104px;
+      height: 388px;
+      float: left;
+      overflow: hidden;
+      margin-top: 140px;
+      margin-left:calc(50% - 52px);
+      background-color: #fff;
+    }
+    .content-list{
+      width: calc(100% - 20px);
+      height: 388px;
+      left: 0;
+      top: 0;
+    }
+    .content-list span{
+      display: inline-block;
+      width: calc(100% - 10px);
+      text-align: left;
+      padding: 4px 0px 4px 20px;
+      color: #000;
+      font-size: 14px;
+    }
+    .scroll-wrap,.scroll{
+      width: 10px;
+    }
+    .scroll-wrap{
+      height: 388px;
+      background-color: #ccc;
+      top: 0;
+      right: 0;
+    }
+    .scroll{
+      height: 50px;
+      background-color: pink;
+      border-radius:20px;
+    }
+  </style>
+  <script type="text/javascript">
+    window.onload = function(){
+      var contentList = document.querySelector('.content-list');
+      var container = document.querySelector('.container');
+      var scrollWrap = document.querySelector('.scroll-wrap');
+      var scroll = document.querySelector('.scroll');
+      //获得内容文档的高度
+      var docScrollH = container.scrollHeight;
+      //获得可视区域的高度
+      var docClientH = container.clientHeight;
+      //获得最大移动距离
+      var docMoveMaxH = docScrollH - docClientH;
+      var scale = Math.min(docClientH/docScrollH);
+      //动态获取滚动滑块的高度
+      scroll.style.height = scrollWrap.clientHeight*scale + 'px';
+      scroll.onmousedown = function(e){
+        var dis = e.pageY - this.parentNode.getBoundingClientRect().top - this.offsetTop;
+        document.onmousemove = function (e){
+          e.preventDefault();
+          var T = e.pageY - dis - scrollWrap.getBoundingClientRect().top;
+          var maxTop = scrollWrap.clientHeight - scroll.offsetHeight;
+          var scaleY;
+          if(T <= 0) T = 0;
+          if(T >= maxTop) T = maxTop;         
+          scaleY = T / maxTop;
+          scroll.style.top = T + 'px';
+          contentList.style.top = - docMoveMaxH * scaleY + 'px';
+        };
+        document.onmouseup = function (){
+          this.onmouseup = this.onmousemove = null;
+        }
+      }
+      var speed = (scrollWrap.clientHeight - scroll.offsetHeight) / 20;
+      var speed2 = docMoveMaxH / 20;
+      // 鼠标滚轮事件
+      mouseWheel(document, function (){
+        // 向上滚动 top 值 要减少，设定的速度 是 speed
+        // 所以最后一次滚动不能小于speed
+        scroll.style.top = scroll.offsetTop >= speed ? scroll.offsetTop - speed + 'px' : 0;
+        contentList.style.top = contentList.offsetTop  + speed2 + 'px';
+        if(contentList.offsetTop  + speed2 >= 0){
+          contentList.style.top = 0;
+        }
+      }, function (){
+        contentList.style.top = contentList.offsetTop  - speed2 + 'px'; 
+        if(Math.abs(contentList.offsetTop - speed2)  > docMoveMaxH){
+          contentList.style.top = - docMoveMaxH + 'px';
+        };
+        scroll.style.top = scroll.offsetTop <= scrollWrap.clientHeight - scroll.offsetHeight - speed ? scroll.offsetTop + speed + 'px' : scrollWrap.clientHeight - scroll.offsetHeight + 'px';
+      });
+      //鼠标滚轮函数
+      function mouseWheel(ele, fnUp, fnDown){
+        if(window.navigator.userAgent.indexOf('Firefox') != -1){
+          ele.addEventListener('DOMMouseScroll', fn);
+        }else{
+          ele.addEventListener('mousewheel', fn);
+        }
+        function fn(e){
+          var dir;
+          // 谷歌和其它浏览器 有e.detail这个属性但是它的值是 0
+          if(e.detail){
+            dir = e.detail < 0 ? true : false;
+          }
+          // 火狐浏览器压根儿没有这个属性，所以这个条件成立证明是非火狐浏览器的
+          if(e.wheelDelta){
+            dir = e.wheelDelta > 0 ? true : false;
+          }
+          if(dir){
+            fnUp && fnUp.call(ele);
+          }else{
+            fnDown && fnDown.call(ele);
+          }
+        }
+      } 
+    }
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="container">
+      <div class="content-list">
+        <span>北京</span>
+        <span>上海</span>
+        <span>哈尔滨</span>
+        <span>宜春</span>
+        <span>沈阳</span>
+        <span>长春</span>
+        <span>富锦</span>
+        <span>天津</span>
+        <span>杭州</span>
+        <span>常州</span>
+        <span>青岛</span>
+        <span>呼和浩特</span>
+        <span>呼伦贝尔</span>
+        <span>青海</span>
+        <span>成都</span>
+        <span>澳门</span>
+        <span>台湾</span>
+        <span>连云港</span>
+        <span>威海</span>
+        <span>宁波</span>
+        <span>西安</span>
+        <span>大连</span>
+        <span>济南</span>
+      </div>
+      <div class="scroll-wrap">
+        <div class="scroll"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
